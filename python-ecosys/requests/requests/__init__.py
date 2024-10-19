@@ -66,7 +66,10 @@ def request(
     if proto == "http:":
         port = 80
     elif proto == "https:":
-        import tls
+        try:
+            import tls
+        except:
+            import ssl as tls
 
         port = 443
     else:
@@ -93,9 +96,12 @@ def request(
     try:
         s.connect(ai[-1])
         if proto == "https:":
-            context = tls.SSLContext(tls.PROTOCOL_TLS_CLIENT)
-            context.verify_mode = tls.CERT_NONE
-            s = context.wrap_socket(s, server_hostname=host)
+            try:
+                context = tls.SSLContext(tls.PROTOCOL_TLS_CLIENT)
+                context.verify_mode = tls.CERT_NONE
+                s = context.wrap_socket(s, server_hostname=host)
+            except:
+                s = tls.wrap_socket(s)
         s.write(b"%s /%s HTTP/1.0\r\n" % (method, path))
 
         if "Host" not in headers:
